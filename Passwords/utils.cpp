@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <conio.h>
+#include <unistd.h>
 #include "utils.h"
 
 using namespace std;
@@ -122,8 +123,10 @@ static void cambiar_password(){
 }
 
 static void eliminar_cuenta(){
-    fstream data(archivo_binario,ios::binary| ios::in | ios::out);
+    fstream data(archivo_binario, ios::binary | ios::in | ios::out);
     s_input_bin readed_data;
+
+    fstream new_data("aux.dat", ios::binary | ios::out);
 
     char searched_name[127];
 
@@ -131,34 +134,21 @@ static void eliminar_cuenta(){
 
     cin >> searched_name ;
 
-    data.read((char*) &readed_data,sizeof(readed_data));
+    while(data.read((char*) &readed_data,sizeof(readed_data))){
 
-    while( !data.eof()){
-        if(strcmp(readed_data.nombre_cuenta,searched_name) == 0)
-            break;
-        data.read((char*) &readed_data, sizeof(readed_data));
+        if(strcmp(readed_data.nombre_cuenta,searched_name) == 0){
+            printf("HIT!");
+            continue;
+        }
+        new_data.write((char*)&readed_data,sizeof(readed_data));
     }
 
-    if(data.eof()){
-        cout << "Cuenta no encontrada o no existe\n";
-        
-    }
-    else{
-        int f_pointer = data.tellg() - sizeof(readed_data);
-
-        data.seekg(f_pointer);
-
-        strcpy(readed_data.nombre_cuenta,"_");
-        strcpy(readed_data.contrasenia_cuenta,"_");
-        strcpy(readed_data.uso,"_");
-
-        data.write((char*) &readed_data,sizeof(readed_data));
-
-        cout << "Cuenta eliminada exitosamente\n";
-    }
     cout << "Enter para continuar... ";
-    getch();
     data.close();
+    new_data.close();
+    remove(archivo_binario);
+    rename("aux.dat",archivo_binario);
+    getch();
 }
 
 void menu(){
