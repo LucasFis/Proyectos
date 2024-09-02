@@ -35,7 +35,7 @@ void list_add_element(void* element, t_list* list){
         list -> head = data;
     else{
         s_nodo* aux = list ->head;
-        for(int i = 0; i < index-1; i++)
+        for(int i = 0; i < index - 1; i++)
             aux = aux -> next;
         aux -> next = data;
     }
@@ -44,7 +44,6 @@ void list_add_element(void* element, t_list* list){
 
 void* list_get_element(t_list* list, unsigned short index){
     s_nodo* data = list -> head; 
-
     for(int i=0 ; i < index && data -> next != NULL; i++){
         data = data -> next;
     }

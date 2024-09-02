@@ -7,7 +7,7 @@
 
 
 const int MAX_X_MAP = 20;
-const int MAX_Y_MAP = 100;
+const int MAX_Y_MAP = 90;
 t_list* enemies;
 
 void level1();
@@ -29,50 +29,19 @@ int main(){
 }
 
 void level1(){
-    for(int i = 0; i < 3; i++){
-        invader invasor(1+space_inbetween_invader*i,1);
-        list_add_element(&invasor,enemies);
+    for(int i = 0; i < 8; i++){
+        invader* invasor = new invader(1+space_inbetween_invader*i,1);
+        list_add_element(invasor, enemies);
     }
 
     draw_invaders(enemies);
 
+    move_invaders(enemies, 2, 0);
+    move_invaders(enemies, 2, 0);
+    move_invaders(enemies, 2, 0);
+    move_invaders(enemies, -2, 0);
+    move_invaders(enemies, -2, 0);
+    move_invaders(enemies, -2, 0);
+
     getch();
-    
-    /*
-
-    while(1){
-        for(int i = 0; i < 40; i++){
-            invador.move(i,0);
-            invador1.move(i,0);
-            invador2.move(i,0);
-            invador3.move(i,0);
-            invador4.move(i,0);
-            invador5.move(i,0);
-            usleep(100000);
-        }
-        
-        invador.move(0,1);
-        invador1.move(0,1);
-        invador2.move(0,1);
-        invador3.move(0,1);
-        invador4.move(0,1);
-        invador5.move(0,1);
-
-        for(int i = 0; i > -40; i--){
-            invador.move(i,0);
-            invador1.move(i,0);
-            invador2.move(i,0);
-            invador3.move(i,0);
-            invador4.move(i,0);
-            invador5.move(i,0);
-            usleep(100000);
-        }
-
-        invador.move(0,1);
-        invador1.move(0,1);
-        invador2.move(0,1);
-        invador3.move(0,1);
-        invador4.move(0,1);
-        invador5.move(0,1);
-    }*/
 }
