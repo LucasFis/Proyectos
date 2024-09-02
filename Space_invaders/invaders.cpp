@@ -1,6 +1,6 @@
 #include<windows.h>
 #include<iostream>
-#include<math.h>
+#include <unistd.h>
 #include"list.h"
 #include "invaders.h"
 
@@ -13,11 +13,23 @@ void invader::draw(){
     HANDLE hconsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD pos = {static_cast<SHORT>(position_x),static_cast<SHORT>(position_y)};
     SetConsoleCursorPosition(hconsole, pos); 
-    std::cout << "*********";
+
+    if(health == 3)
+        std::cout << "*********";
+    else if (health == 2)
+        std::cout << "** **  **";
+    else std::cout << "*   *  **";
+
     pos.Y = pos.Y + 1;
     pos.X = pos.X + 1;  
+
     SetConsoleCursorPosition(hconsole,pos);
-    std::cout << "*** ***";
+
+    if(health == 3)
+        std::cout << "*** ***";
+    else if(health == 2)
+        std::cout << "* * ***";
+    else std::cout << "* *   *";
 }
 
 void invader::clean(){
@@ -86,12 +98,42 @@ bool check_collision_all_enemies(t_list* enemie_list,int x, int y){
     return false;
 }
 
-void move_invaders(t_list* enemie_list, int x, int y){
+bool move_invaders(t_list* enemie_list, int x, int y){
     invader* invasor = nullptr;
 
-    if(!check_collision_all_enemies(enemie_list, x, y))
+    if(!check_collision_all_enemies(enemie_list, x, y)){
         for(int i = 0; i < enemie_list -> elements_count; i++){
             invasor = (invader*)list_get_element(enemie_list,i);
             invasor -> move(x,y);
         }
+        return true;
+    }
+    return false;
+}
+
+void make_invaders(t_list* enemies, int x_amount, int y_amount){
+    for(int j = 0; j < y_amount; j++)
+        for(int i = 0; i < x_amount; i++){
+            invader* invasor = new invader(1+space_inbetween_invader*i,1 + (1 + invader_heigth)*j);
+            list_add_element(invasor, enemies);
+        }
+}
+
+void* move_left_right_invaders(void* void_enemies){
+    t_list* enemies = (t_list*) void_enemies;
+    bool change_direction = true;
+    bool mov_value = true;
+    while(1){
+        if(!change_direction)
+            mov_value = !mov_value;
+        if(mov_value){
+            change_direction = move_invaders(enemies, 2, 0);
+            usleep(100000);
+        }
+        else{
+            change_direction = move_invaders(enemies, -2, 0);
+            usleep(100000);
+        }
+    }
+    return NULL;
 }

@@ -11,6 +11,7 @@ extern const int MAX_Y_MAP;
 
 class invader{
     private:
+        int health = 3;
         int position_x;
         int position_y;
     public:
@@ -22,7 +23,9 @@ class invader{
         bool check_collision_wall(int, int);
 };
 
+void make_invaders(t_list* enemies, int x_amount, int y_amount);
 void draw_invaders(t_list* enemie_list);
-void move_invaders(t_list* enemie_list, int x, int y);
+bool move_invaders(t_list* enemie_list, int x, int y);
+void* move_left_right_invaders(void* void_enemies);
 
 #endif

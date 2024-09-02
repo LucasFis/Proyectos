@@ -1,14 +1,18 @@
 #include <conio.h>
 #include "list.h"
-#include<cstdlib>
+#include <cstdlib>
 #include <unistd.h>
+#include <pthread.h>
 #include "invaders.h"
 #include "map.h"
-
+#include "shields.h"
+#include "ship.h"
 
 const int MAX_X_MAP = 20;
-const int MAX_Y_MAP = 90;
+const int MAX_Y_MAP = 80;
 t_list* enemies;
+t_list* shields;
+ship* player;
 
 void level1();
 
@@ -16,7 +20,8 @@ int main(){
     system("cls");
 
     enemies = new_list();
-
+    shields = new_list();
+    
     char** map = create_map(MAX_X_MAP, MAX_Y_MAP);
 
     initialize_map(map, MAX_X_MAP, MAX_Y_MAP);
@@ -29,19 +34,20 @@ int main(){
 }
 
 void level1(){
-    for(int i = 0; i < 8; i++){
-        invader* invasor = new invader(1+space_inbetween_invader*i,1);
-        list_add_element(invasor, enemies);
-    }
-
+    make_invaders(enemies,6,2);
+    make_shields(shields,3);
+    player = make_player();
+    
     draw_invaders(enemies);
+    draw_shields(shields);
+    
+    pthread_t p_movement_invaders;
+    pthread_create(&p_movement_invaders,NULL,move_left_right_invaders,enemies);
+    pthread_detach(p_movement_invaders);
 
-    move_invaders(enemies, 2, 0);
-    move_invaders(enemies, 2, 0);
-    move_invaders(enemies, 2, 0);
-    move_invaders(enemies, -2, 0);
-    move_invaders(enemies, -2, 0);
-    move_invaders(enemies, -2, 0);
+    pthread_t p_movement_player;
+    pthread_create(&p_movement_player,NULL,listen_to_player,player);
+    pthread_detach(p_movement_player);
 
-    getch();
+    sleep(1000);
 }
