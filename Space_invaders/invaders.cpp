@@ -128,11 +128,11 @@ void* move_left_right_invaders(void* void_enemies){
             mov_value = !mov_value;
         if(mov_value){
             change_direction = move_invaders(enemies, 2, 0);
-            usleep(100000);
+            usleep(305000);
         }
         else{
             change_direction = move_invaders(enemies, -2, 0);
-            usleep(100000);
+            usleep(305000);
         }
     }
     return NULL;

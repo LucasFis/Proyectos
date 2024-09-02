@@ -22,11 +22,11 @@ int main(){
     enemies = new_list();
     shields = new_list();
     
-    char** map = create_map(MAX_X_MAP, MAX_Y_MAP);
+    char** map = create_map();
 
-    initialize_map(map, MAX_X_MAP, MAX_Y_MAP);
+    initialize_map(map);
 
-    print_map(map, MAX_X_MAP, MAX_Y_MAP);
+    print_map(map);
 
     level1();
 
