@@ -141,3 +141,21 @@ void* move_left_right_invaders(void* void_enemies){
     }
     return NULL;
 }
+
+t_hitbox* invader::front_hitbox(){
+    t_hitbox* new_hitbox = (t_hitbox*) malloc(sizeof(t_hitbox));
+    new_hitbox -> y_value = position_y;
+    new_hitbox -> x_values = (int*) malloc(invader_width);
+    for(int i = 0; i < invader_width ; i++)
+        new_hitbox -> x_values[i] = this -> position_x + i;
+
+    return new_hitbox;
+}
+
+bool compare_positions(int* vector, t_hitbox* hitbox_to_test){
+    if(vector[1] == hitbox_to_test ->y_value)
+        for(int j = 0; j < invader_width ; j++)
+                if(vector[0]==hitbox_to_test -> x_values[j])
+                    return true;
+    return false;
+}

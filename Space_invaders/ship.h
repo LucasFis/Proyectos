@@ -1,16 +1,17 @@
 #define __SHIP_H__
 #ifdef __SHIP_H__
 
+struct t_list;
+
 extern const int MAX_X_MAP;
 extern const int MAX_Y_MAP;
 extern pthread_mutex_t draw_mutex;
+extern t_list* enemies;
 
 const int player_width = 5;
 const int player_heigth = 3;
 
 static bool bool_shot = false;
-
-struct t_list;
 
 class ship{
     private:
@@ -37,12 +38,13 @@ class bullet{
         }
         int get_x(){return position_x;}
         int get_y(){return position_y;}
-        bool collision_with_any();
+        bool collision_with_any(bullet*,t_list*);
         void draw();
         void clean();
+        void destroy(bullet*);
 };
 
 ship* make_player();
 void* listen_to_player(void* void_player);
-
+static bool collision_with_invader(bullet*,t_list*);
 #endif

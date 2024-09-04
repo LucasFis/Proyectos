@@ -3,7 +3,11 @@
 #include <conio.h>
 #include <unistd.h>
 #include "ship.h"
+#include "invaders.h"
+#include "list.h"
 static void* animate_shoot(void* nothing);
+
+pthread_t p_bullet;
 
 ship::ship(){
     position_x = 4;
@@ -125,7 +129,6 @@ void ship::shoot(){
 
     bullet* new_bullet = new bullet(position_x + 1,position_y - 1);
 
-    pthread_t p_bullet;
     pthread_create(&p_bullet, NULL, animate_shoot,new_bullet);
     pthread_detach(p_bullet);
 }
@@ -154,7 +157,8 @@ static void* animate_shoot(void* void_bullet){
         pthread_mutex_unlock(&draw_mutex);
         usleep(60000);
         new_bullet -> clean();
-        
+        new_bullet -> collision_with_any(new_bullet, enemies);
+        pthread_testcancel();
     }
     bool_shot = false;
     free(new_bullet);
@@ -175,3 +179,37 @@ void* listen_to_player(void* void_player){
 
     return NULL;
 }
+
+bool bullet::collision_with_any(bullet* new_bullet,t_list* enemies){
+    return collision_with_invader(new_bullet, enemies);
+}
+
+void bullet::destroy(bullet* bullet_to_destroy){
+    pthread_cancel(p_bullet);
+    bool_shot = true;
+}
+
+static bool collision_with_invader(bullet *to_test, t_list* enemies){
+    int vector[2] = { to_test -> get_x(), to_test ->get_y() };
+    bool final_value = false;
+    t_hitbox* hitbox_invader = nullptr;
+
+    for(int i = 0; i < enemies -> elements_count && bool_shot ;i++){
+        invader* invasor = (invader*)list_get_element(enemies,i);
+        hitbox_invader = invasor -> front_hitbox();
+
+        final_value = compare_positions(vector, hitbox_invader);
+        
+        if(final_value){
+            invasor -> health -= 1; 
+            to_test -> destroy(to_test);
+        }
+
+        free(hitbox_invader);
+    }
+    
+    return final_value;
+}
+
+
+
