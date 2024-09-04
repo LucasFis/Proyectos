@@ -72,27 +72,38 @@ void ship::listen_to_action(){
     while(1){
         usleep(200000);
         character = getch();
-        pthread_mutex_lock(&draw_mutex);
-        clean();
+        
         switch(character){
             case 'a':
             case 'A':
-                if(!collision_test(-1))
+                if(!collision_test(-1)){
+                    pthread_mutex_lock(&draw_mutex);
+                    clean();
                     position_x = position_x - 2;
+                    draw();
+                    pthread_mutex_unlock(&draw_mutex);
+                }
                 break;
             case 'd':
             case 'D':
-                if(!collision_test(1))
+                if(!collision_test(1)){
+                    pthread_mutex_lock(&draw_mutex);
+                    clean();
                     position_x = position_x + 2;
+                    draw();
+                    pthread_mutex_unlock(&draw_mutex);
+                }
                 break;
             case 'w':
             case 'W':
-                shoot();
+                if(!bool_shot){
+                    bool_shot = true;
+                    shoot();
+                }
                 break;
         }
         
-        draw();
-        pthread_mutex_unlock(&draw_mutex);
+        
     }
 }
 
@@ -141,10 +152,11 @@ static void* animate_shoot(void* void_bullet){
         pthread_mutex_lock(&draw_mutex);
         new_bullet -> draw();
         pthread_mutex_unlock(&draw_mutex);
-        usleep(120000);
+        usleep(60000);
         new_bullet -> clean();
         
     }
+    bool_shot = false;
     free(new_bullet);
     return NULL;
 }

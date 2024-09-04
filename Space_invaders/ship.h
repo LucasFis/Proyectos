@@ -8,6 +8,8 @@ extern pthread_mutex_t draw_mutex;
 const int player_width = 5;
 const int player_heigth = 3;
 
+static bool bool_shot = false;
+
 struct t_list;
 
 class ship{
