@@ -49,3 +49,21 @@ void* list_get_element(t_list* list, unsigned short index){
     }
     return data -> content;
 }
+
+void* list_delete_element(t_list* list, void* element){
+    s_nodo* fst_aux = list ->head;
+    s_nodo* snd_aux = nullptr;
+    bool is_there = false;
+
+    while(fst_aux -> next != nullptr && !(is_there = fst_aux -> next -> content == element))
+        fst_aux = fst_aux -> next;
+    
+    if(is_there){
+        void* node_content = fst_aux -> next -> content;
+        snd_aux = fst_aux -> next -> next;
+        fst_aux -> next = snd_aux;
+        list ->elements_count--;
+        return node_content;
+    }
+    else return NULL;
+}

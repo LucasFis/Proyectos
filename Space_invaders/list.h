@@ -17,5 +17,5 @@ struct t_list{
 t_list* new_list(void);
 void list_add_element(void* element, t_list* list);
 void* list_get_element(t_list* list, unsigned short index);
-
+void* list_delete_element(t_list* list,void* element);
 #endif

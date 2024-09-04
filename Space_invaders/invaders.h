@@ -29,6 +29,7 @@ class invader{
         void shoot();
         bool check_collision_wall(int, int);
         t_hitbox* front_hitbox();
+        void destroy(invader*, t_list*);
 };
 
 void make_invaders(t_list* enemies, int x_amount, int y_amount);

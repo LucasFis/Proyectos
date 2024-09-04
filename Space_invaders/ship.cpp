@@ -151,16 +151,20 @@ void bullet::clean(){
 static void* animate_shoot(void* void_bullet){
     bullet* new_bullet = (bullet*) void_bullet;
 
-    while(new_bullet ->get_y() <= MAX_X_MAP && new_bullet -> get_y()  != 0){
+    while(new_bullet->get_y() <= MAX_X_MAP && new_bullet->get_y() != 0){
         pthread_mutex_lock(&draw_mutex);
-        new_bullet -> draw();
+        new_bullet->draw();
         pthread_mutex_unlock(&draw_mutex);
-        usleep(60000);
-        new_bullet -> clean();
-        new_bullet -> collision_with_any(new_bullet, enemies);
-        pthread_testcancel();
+        usleep(60000); 
+        new_bullet->clean();
+        new_bullet->collision_with_any(new_bullet, enemies);
+        if(!bool_shot)
+            goto end;
     }
+
     bool_shot = false;
+    end:
+
     free(new_bullet);
     return NULL;
 }
@@ -186,7 +190,7 @@ bool bullet::collision_with_any(bullet* new_bullet,t_list* enemies){
 
 void bullet::destroy(bullet* bullet_to_destroy){
     pthread_cancel(p_bullet);
-    bool_shot = true;
+    bool_shot = false;
 }
 
 static bool collision_with_invader(bullet *to_test, t_list* enemies){
@@ -203,6 +207,8 @@ static bool collision_with_invader(bullet *to_test, t_list* enemies){
         if(final_value){
             invasor -> health -= 1; 
             to_test -> destroy(to_test);
+            if(invasor -> health <= 0)
+                invasor -> destroy(invasor,enemies);
         }
 
         free(hitbox_invader);

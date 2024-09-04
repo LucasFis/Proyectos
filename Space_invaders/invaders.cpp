@@ -152,6 +152,12 @@ t_hitbox* invader::front_hitbox(){
     return new_hitbox;
 }
 
+void invader::destroy(invader* invasor,t_list* enemies){
+    list_delete_element(enemies,invasor);
+    invasor -> clean();
+    free(invasor);
+}
+
 bool compare_positions(int* vector, t_hitbox* hitbox_to_test){
     if(vector[1] == hitbox_to_test ->y_value)
         for(int j = 0; j < invader_width ; j++)
