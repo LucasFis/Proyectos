@@ -8,6 +8,7 @@ const int invader_heigth = 2;
 
 extern const int MAX_X_MAP;
 extern const int MAX_Y_MAP;
+extern pthread_mutex_t draw_mutex;
 
 class invader{
     private:

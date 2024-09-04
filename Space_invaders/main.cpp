@@ -14,11 +14,14 @@ t_list* enemies;
 t_list* shields;
 ship* player;
 
+pthread_mutex_t draw_mutex;
+
 void level1();
 
 int main(){
     system("cls");
 
+    pthread_mutex_init(&draw_mutex,NULL);
     enemies = new_list();
     shields = new_list();
     

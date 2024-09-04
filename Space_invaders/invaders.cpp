@@ -1,6 +1,7 @@
 #include<windows.h>
 #include<iostream>
 #include <unistd.h>
+#include <pthread.h>
 #include"list.h"
 #include "invaders.h"
 
@@ -51,14 +52,15 @@ void invader::shoot(){
 }
 
 void invader::move(int x, int y){
+    pthread_mutex_lock(&draw_mutex);
     clean();
 
     if(x != 0)
             position_x = position_x + x/abs(x) * 1;
     if(y != 0)
             position_y = position_y + y/abs(y) * 1;
-
     draw();
+    pthread_mutex_unlock(&draw_mutex);
 }
 
 bool invader::check_collision_wall(int x , int y){
@@ -124,6 +126,7 @@ void* move_left_right_invaders(void* void_enemies){
     bool change_direction = true;
     bool mov_value = true;
     while(1){
+        
         if(!change_direction)
             mov_value = !mov_value;
         if(mov_value){
@@ -134,6 +137,7 @@ void* move_left_right_invaders(void* void_enemies){
             change_direction = move_invaders(enemies, -2, 0);
             usleep(305000);
         }
+
     }
     return NULL;
 }

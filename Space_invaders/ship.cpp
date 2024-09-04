@@ -72,6 +72,7 @@ void ship::listen_to_action(){
     while(1){
         usleep(200000);
         character = getch();
+        pthread_mutex_lock(&draw_mutex);
         clean();
         switch(character){
             case 'a':
@@ -89,7 +90,9 @@ void ship::listen_to_action(){
                 shoot();
                 break;
         }
+        
         draw();
+        pthread_mutex_unlock(&draw_mutex);
     }
 }
 
@@ -135,9 +138,12 @@ static void* animate_shoot(void* void_bullet){
     bullet* new_bullet = (bullet*) void_bullet;
 
     while(new_bullet ->get_y() <= MAX_X_MAP && new_bullet -> get_y()  != 0){
+        pthread_mutex_lock(&draw_mutex);
         new_bullet -> draw();
+        pthread_mutex_unlock(&draw_mutex);
         usleep(120000);
         new_bullet -> clean();
+        
     }
     free(new_bullet);
     return NULL;

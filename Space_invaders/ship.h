@@ -3,6 +3,7 @@
 
 extern const int MAX_X_MAP;
 extern const int MAX_Y_MAP;
+extern pthread_mutex_t draw_mutex;
 
 const int player_width = 5;
 const int player_heigth = 3;

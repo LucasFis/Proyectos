@@ -6,6 +6,7 @@ const int space_inbetween_shields = 23;
 
 extern const int MAX_X_MAP;
 extern const int MAX_Y_MAP;
+extern pthread_mutex_t draw_mutex;
 
 class shield{
     public:
