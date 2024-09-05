@@ -3,7 +3,14 @@
 #include <unistd.h>
 #include <pthread.h>
 #include"list.h"
+#include "ship.h"
 #include "invaders.h"
+#include <cstdlib>
+#include <random>
+
+pthread_t p_bullet_enemie;
+static void* animate_enemie_shot(void* void_bullet);
+void random_shot(invader* invasor);
 
 invader::invader(int x, int y){
     position_x = x;
@@ -45,10 +52,31 @@ void invader::clean(){
 }
 
 void invader::shoot(){
-    HANDLE hconsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD pos = {static_cast<SHORT>(position_x+2),static_cast<SHORT>(position_y+2)};
-    SetConsoleCursorPosition(hconsole, pos); 
-    printf("%c",179);
+    
+    bullet* new_bullet = new bullet(position_x + 3,position_y + 2);
+
+    pthread_create(&p_bullet_enemie, NULL, animate_enemie_shot,new_bullet);
+    pthread_detach(p_bullet_enemie);
+}
+
+static void* animate_enemie_shot(void* void_bullet){
+    bullet* new_bullet = (bullet*) void_bullet;
+
+    while(new_bullet->get_y() <= MAX_X_MAP - 3 && new_bullet->get_y() != 0){
+        pthread_mutex_lock(&draw_mutex);
+        new_bullet->draw(false);
+        pthread_mutex_unlock(&draw_mutex);
+        usleep(60000); 
+        pthread_mutex_lock(&draw_mutex);
+        new_bullet->clean(false);
+        pthread_mutex_unlock(&draw_mutex);
+        new_bullet->collision_with_any(new_bullet, enemies,shields);
+
+    }
+
+
+    free(new_bullet);
+    return NULL;
 }
 
 void invader::move(int x, int y){
@@ -152,16 +180,69 @@ t_hitbox* invader::front_hitbox(){
     return new_hitbox;
 }
 
+t_list* enemies_lower_row(t_list* complete_list){
+    s_nodo* data = complete_list -> head;
+    int lower_position = 0;
+    invader* invasor = nullptr;
+    t_list* list = new_list();
+    for ( int i = 0 ;data -> next != NULL;i++){
+        invasor = (invader*)list_get_element(complete_list,i);
+        if(lower_position < invasor -> get_y())
+            lower_position = invasor -> get_y();
+        
+        data = data -> next;
+    }
+    data = complete_list -> head;
+    for ( int i = 0 ;data -> next != NULL;i++){
+        invasor = (invader*)list_get_element(complete_list,i);
+
+        if(lower_position == invasor -> get_y())
+            list_add_element(invasor,list);
+
+        data = data -> next;
+    }
+    return list;
+}
+
 void invader::destroy(invader* invasor,t_list* enemies){
     list_delete_element(enemies,invasor);
     invasor -> clean();
     free(invasor);
 }
 
-bool compare_positions(int* vector, t_hitbox* hitbox_to_test){
+bool compare_positions(int* vector, t_hitbox* hitbox_to_test,int value_width){
     if(vector[1] == hitbox_to_test ->y_value)
-        for(int j = 0; j < invader_width ; j++)
+        for(int j = 0; j < value_width ; j++)
                 if(vector[0]==hitbox_to_test -> x_values[j])
                     return true;
     return false;
+}
+
+void randomly_shot_with_list(t_list* list){
+    invader* invasor = nullptr;
+    for(int i = 0; i < list -> elements_count ; i++){
+
+        invasor = (invader*) list_get_element(list,i);
+
+        random_shot(invasor);
+    }
+}
+
+void random_shot(invader* invasor){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(1, 100);
+
+    
+    int random_number = dis(gen);
+        
+    if(random_number < 30)
+        invasor -> shoot();
+
+}
+
+void random_shots_enemies(t_list* enemies){
+    t_list* bottom_row = enemies_lower_row(enemies);
+
+    randomly_shot_with_list(bottom_row);
 }

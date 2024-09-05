@@ -5,6 +5,8 @@
 #include "ship.h"
 #include "invaders.h"
 #include "list.h"
+#include "shields.h"
+
 static void* animate_shoot(void* nothing);
 
 pthread_t p_bullet;
@@ -123,9 +125,6 @@ bool ship::collision_test(int x){
 }
 
 void ship::shoot(){
-    HANDLE hconsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD pos = {static_cast<SHORT>(position_x + 1),static_cast<SHORT>(position_y - 1)};
-    SetConsoleCursorPosition(hconsole, pos);
 
     bullet* new_bullet = new bullet(position_x + 1,position_y - 1);
 
@@ -133,17 +132,23 @@ void ship::shoot(){
     pthread_detach(p_bullet);
 }
 
-void bullet::draw(){
+void bullet::draw(bool up){
     HANDLE hconsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD pos = {static_cast<SHORT>(position_x),static_cast<SHORT>(position_y)};
     SetConsoleCursorPosition(hconsole, pos);
     printf("%c",179);
-    position_y--;
+    if(up)
+        position_y--;
+    else position_y++;
 }
 
-void bullet::clean(){
+void bullet::clean(bool down){
     HANDLE hconsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD pos = {static_cast<SHORT>(position_x),static_cast<SHORT>(position_y+1)};
+    int pos_y = 0;
+    if(down)
+    pos_y = position_y + 1;
+    else pos_y = position_y - 1;
+    COORD pos = {static_cast<SHORT>(position_x),static_cast<SHORT>(pos_y)};
     SetConsoleCursorPosition(hconsole, pos);
     printf(" ");
 }
@@ -153,11 +158,11 @@ static void* animate_shoot(void* void_bullet){
 
     while(new_bullet->get_y() <= MAX_X_MAP && new_bullet->get_y() != 0){
         pthread_mutex_lock(&draw_mutex);
-        new_bullet->draw();
+        new_bullet->draw(true);
         pthread_mutex_unlock(&draw_mutex);
         usleep(60000); 
-        new_bullet->clean();
-        new_bullet->collision_with_any(new_bullet, enemies);
+        new_bullet->clean(true);
+        new_bullet->collision_with_any(new_bullet, enemies,shields);
         if(!bool_shot)
             goto end;
     }
@@ -184,8 +189,10 @@ void* listen_to_player(void* void_player){
     return NULL;
 }
 
-bool bullet::collision_with_any(bullet* new_bullet,t_list* enemies){
-    return collision_with_invader(new_bullet, enemies);
+bool bullet::collision_with_any(bullet* new_bullet,t_list* enemies, t_list* shields){
+    bool collision_invader =  collision_with_invader(new_bullet, enemies);
+    bool collision_shield = collision_with_shield(new_bullet, shields);
+    return collision_invader || collision_shield;
 }
 
 void bullet::destroy(bullet* bullet_to_destroy){
@@ -202,7 +209,7 @@ static bool collision_with_invader(bullet *to_test, t_list* enemies){
         invader* invasor = (invader*)list_get_element(enemies,i);
         hitbox_invader = invasor -> front_hitbox();
 
-        final_value = compare_positions(vector, hitbox_invader);
+        final_value = compare_positions(vector, hitbox_invader,invader_width);
         
         if(final_value){
             invasor -> health -= 1; 
@@ -214,6 +221,29 @@ static bool collision_with_invader(bullet *to_test, t_list* enemies){
         free(hitbox_invader);
     }
     
+    return final_value;
+}
+
+static bool collision_with_shield(bullet* to_test, t_list* shields){
+    int vector[2] = { to_test -> get_x(), to_test ->get_y() };
+    bool final_value = false;
+    t_hitbox* hitbox_shield = nullptr;
+
+    for(int i = 0; i < shields -> elements_count && bool_shot ;i++){
+        shield* hitted_shield = (shield*)list_get_element(shields,i);
+        hitbox_shield = hitted_shield -> bottom_hitbox();
+
+        final_value = compare_positions(vector, hitbox_shield, shield_width);
+        
+        if(final_value){
+            hitted_shield -> health -= 1; 
+            to_test -> destroy(to_test);
+            hitted_shield -> draw();
+            if(hitted_shield -> health <= 0)
+                hitted_shield -> destroy(hitted_shield,shields);
+        }
+        free(hitbox_shield);
+    }
     return final_value;
 }
 

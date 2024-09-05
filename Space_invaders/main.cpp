@@ -52,5 +52,10 @@ void level1(){
     pthread_create(&p_movement_player,NULL,listen_to_player,player);
     pthread_detach(p_movement_player);
 
+
+    while(1){
+        random_shots_enemies(enemies);
+        usleep(1000000);
+    }
     sleep(1000);
 }

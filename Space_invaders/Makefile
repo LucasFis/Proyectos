@@ -1,6 +1,6 @@
 GCC = g++
 
-start: main.o invaders.o map.o list.o shields.o ship.o
+start: main.o invaders.o map.o list.o shields.o ship.o 
 	$(GCC) -g main.o invaders.o map.o list.o shields.o ship.o -o main.exe
 
 main.o: main.cpp
