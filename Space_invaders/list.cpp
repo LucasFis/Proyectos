@@ -1,8 +1,5 @@
 #include<cstdlib>
 #include<iostream>
-#include "map.h"
-#include "invaders.h"
-#include "ship.h"
 #include "list.h"
 
 t_list* new_list(void){

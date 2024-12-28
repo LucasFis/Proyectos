@@ -161,7 +161,9 @@ static void* animate_shoot(void* void_bullet){
         new_bullet->draw(true);
         pthread_mutex_unlock(&draw_mutex);
         usleep(60000); 
+        pthread_mutex_lock(&draw_mutex);
         new_bullet->clean(true);
+        pthread_mutex_unlock(&draw_mutex);
         new_bullet->collision_with_any(new_bullet, enemies,shields);
         if(!bool_shot)
             goto end;
